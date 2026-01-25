@@ -143,6 +143,19 @@ if(CLANG_TIDY_EXE)
   )
 endif()
 
+# UNIT TESTS
+
+# Find c-ares library for unit tests
+find_library(CARES_LIBRARY NAMES cares)
+if(NOT CARES_LIBRARY)
+  message(WARNING "c-ares library not found, unit tests will not be built")
+else()
+  add_executable(test_bootstrap_source_binding tests/unit/test_bootstrap_source_binding.c)
+  target_link_libraries(test_bootstrap_source_binding ${CARES_LIBRARY})
+  target_include_directories(test_bootstrap_source_binding PRIVATE ${LIBCARES_INCLUDE_DIR})
+  set_property(TARGET test_bootstrap_source_binding PROPERTY C_STANDARD 11)
+endif()
+
 # INSTALL
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -176,6 +189,13 @@ else()
   message(STATUS "python3 found: ${PYTHON3_EXE}")
 
   enable_testing()
+
+  # Unit tests
+  if(CARES_LIBRARY)
+    add_test(NAME unit_bootstrap_source_binding COMMAND test_bootstrap_source_binding)
+  endif()
+
+  # Robot framework tests
   add_test(NAME robot COMMAND ${PYTHON3_EXE} -m robot.run functional_tests.robot
            WORKING_DIRECTORY tests/robot)
 endif()
