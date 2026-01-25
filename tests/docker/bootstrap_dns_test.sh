@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Quick test for bootstrap DNS source binding feature
+#
+# When to use:
+# - Quick verification during feature development
+# - Testing bootstrap DNS feature specifically
+# - Developing on macOS (proxy uses Linux-specific syscalls like accept4, MSG_MORE)
+#
+# Runtime: ~30 seconds
+
 docker_bin="${DOCKER_BIN:-docker}"
 if ! command -v "$docker_bin" >/dev/null 2>&1; then
   echo "docker not found; set DOCKER_BIN or install Docker." >&2

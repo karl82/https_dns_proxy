@@ -1,0 +1,25 @@
+FROM ubuntu:24.04
+
+# Install all build and test dependencies in one layer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    iproute2 \
+    cmake \
+    build-essential \
+    libcurl4-openssl-dev \
+    libc-ares-dev \
+    libev-dev \
+    libsystemd-dev \
+    python3 \
+    python3-pip \
+    python3-venv \
+    dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Robot Framework
+RUN pip3 install --break-system-packages robotframework
+
+WORKDIR /src
+
+# Default command runs all tests
+CMD ["bash", "-c", "cmake -S . -B build && cmake --build build && cd tests/robot && python3 -m robot.run functional_tests.robot"]
