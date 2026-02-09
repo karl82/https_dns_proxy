@@ -202,26 +202,19 @@ Truncate UDP Impossible
   # the only TXT answer record has to be dropped to met limit
   ...  Verify Truncation  txtfill4096.test.dnscheck.tools  4096  12  100  ANSWER: 0
 
-Source Address Binding HTTPS
-  [Documentation]  Test source address binding with -S flag for HTTPS connections
-  ${eth0_ip} =  Run  ip -4 addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1 | tr -d '\\n'
-  Start Proxy  -S  ${eth0_ip}
-  Set To Dictionary  ${expected_logs}  Using source address=1
-  Run Dig
-
-Source Address Binding Bootstrap DNS
-  [Documentation]  Test bootstrap DNS uses -S source address binding
+Source Address Binding
+  [Documentation]  Test -S flag binds both HTTPS and bootstrap DNS to source address
   [Tags]  bootstrap
 
   ${eth0_ip} =  Run  ip -4 addr show eth0 | grep inet | awk '{print $2}' | cut -d/ -f1 | tr -d '\\n'
 
-  # Start proxy with explicit bootstrap DNS servers to force bootstrap lookup
+  # Use explicit resolver hostname to force bootstrap DNS resolution
   Start Proxy  -S  ${eth0_ip}  -b  1.1.1.1,8.8.8.8  -r  https://dns.google/dns-query
 
   # Wait for bootstrap DNS to complete
   Sleep  2s
 
-  # Verify source address binding was applied for HTTPS
+  # Verify source address binding was applied
   Set To Dictionary  ${expected_logs}  Using source address=1
 
   # Verify bootstrap DNS completed successfully
@@ -230,7 +223,7 @@ Source Address Binding Bootstrap DNS
   # Verify no bootstrap DNS failures
   Append To List  ${error_logs}  DNS lookup of 'dns.google' failed
 
-  # Verify proxy works
+  # Verify proxy works (HTTPS connection uses source binding)
   Run Dig
 
 Source Address Binding IPv6 With IPv4 Only Mode
